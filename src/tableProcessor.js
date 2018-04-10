@@ -364,10 +364,14 @@ TableProcessor.prototype.endRow = function (rowIndex, writer, pageBreaks) {
 	}
 
 	if (this.dontBreakRows) {
-		writer.tracker.auto('pageChanged',
-			function () {
-				if (!self.headerRows && self.layout.hLineWhenBroken !== false) {
-					self.drawHorizontalLine(rowIndex, writer);
+		writer.tracker.auto(['pageChanged', 'beforePageChanged'],
+			function (info) {
+				if(self.layout.hLineWhenBroken !== false) {
+					if(info.page) {
+						self.drawHorizontalLine(rowIndex, writer, info.y - self.bottomLineWidth);
+					} else if (!self.headerRows) {
+						self.drawHorizontalLine(rowIndex, writer);
+					}
 				}
 			},
 			function () {
