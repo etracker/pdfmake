@@ -70,6 +70,11 @@ PageElementWriter.prototype.addFragment = function (fragment, useBlockXOffset, u
 
 PageElementWriter.prototype.moveToNextPage = function (pageOrientation) {
 
+	this.writer.tracker.emit('beforePageChanged', {
+		page: this.writer.context.page,
+		y: this.writer.context.y
+	});
+
 	var nextPage = this.writer.context.moveToNextPage(pageOrientation);
 
 	if (nextPage.newPageCreated) {

@@ -38,10 +38,14 @@ TraversalTracker.prototype.emit = function (event) {
 	});
 };
 
-TraversalTracker.prototype.auto = function (event, callback, innerFunction) {
-	this.startTracking(event, callback);
-	innerFunction();
-	this.stopTracking(event, callback);
+TraversalTracker.prototype.auto = function (event, cb, innerBlock) {
+	if(!Array.isArray(event)) {
+		event = [event];
+	}
+	
+	event.forEach(eventName => this.startTracking(eventName, cb));
+	innerBlock();
+	event.forEach(eventName => this.stopTracking(eventName, cb));
 };
 
 module.exports = TraversalTracker;
