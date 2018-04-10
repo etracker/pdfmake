@@ -39,21 +39,15 @@
     "build": "gulp build",
     "test": "gulp"
   },
+  "publishConfig": {
+    "registry": "http://nexus1.hhoffice.de.etracker.com:8081/repository/npm-internal/"
+  },
   "repository": {
     "type": "git",
-    "url": "git://github.com/bpampuch/pdfmake.git"
+    "url": "git@git-chef.prod.hhrz1.de.etracker.com:mbeboek/pdfmake.git"
   },
-  "keywords": [
-    "pdf",
-    "javascript",
-    "printing",
-    "layout"
-  ],
   "author": "Bartek Pampuch <bartosz.pampuch@gmail.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/bpampuch/pdfmake/issues"
-  },
   "homepage": "http://pdfmake.org",
   "config": {
     "blanket": {
