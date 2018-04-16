@@ -103,6 +103,14 @@ ElementWriter.prototype.addImage = function (image, index) {
 	image.x = context.x + image._x;
 	image.y = context.y;
 
+	if(image.verticalAlignment && image.verticalAlignment === "center") {
+		image.y -= image._height / 2.0;
+		
+		if (Array.isArray(image.fit) && image.fit.length > 1) {
+			image.y += image.fit[1] / 2.0;
+		}
+	}
+
 	this.alignImage(image);
 
 	addPageItem(page, {
