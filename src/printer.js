@@ -13,6 +13,7 @@ var isString = require('./helpers').isString;
 var isNumber = require('./helpers').isNumber;
 var isBoolean = require('./helpers').isBoolean;
 var isArray = require('./helpers').isArray;
+const StyleContextStack = require('./styleContextStack');
 
 ////////////////////////////////////////
 // PdfPrinter
@@ -21,7 +22,7 @@ var isArray = require('./helpers').isArray;
  * @class Creates an instance of a PdfPrinter which turns document definition into a pdf
  *
  * @param {Object} fontDescriptors font definition dictionary
- *
+ * 
  * @example
  * var fontDescriptors = {
  *	Roboto: {
@@ -81,38 +82,39 @@ function PdfPrinter(fontDescriptors) {
  *
  * @return {Object} a pdfKit document object which can be saved or encode to data-url
  */
-PdfPrinter.prototype.createPdfKitDocument = function (docDefinition, options) {
-	options = options || {};
+PdfPrinter.prototype.createPdfKitDocument = function (docDefinition = null, options = {}) {
 
-	var pageSize = fixPageSize(docDefinition.pageSize, docDefinition.pageOrientation);
-	var compressPdf = isBoolean(docDefinition.compress) ? docDefinition.compress : true;
-	var bufferPages = options.bufferPages || false;
-
-	this.pdfKitDoc = new PdfKit({size: [pageSize.width, pageSize.height], bufferPages: bufferPages, autoFirstPage: false, compress: compressPdf});
-	setMetadata(docDefinition, this.pdfKitDoc);
-
-	this.fontProvider = new FontProvider(this.fontDescriptors, this.pdfKitDoc);
-
-	docDefinition.images = docDefinition.images || {};
-
-	var builder = new LayoutBuilder(pageSize, fixPageMargins(docDefinition.pageMargins || 40), new ImageMeasure(this.pdfKitDoc, docDefinition.images));
-
-	registerDefaultTableLayouts(builder);
-	if (options.tableLayouts) {
-		builder.registerTableLayouts(options.tableLayouts);
+	if (!this.docDefinition) {
+		this.initDocument(docDefinition, options);
 	}
 
-	var pages = builder.layoutDocument(docDefinition.content, this.fontProvider, docDefinition.styles || {}, docDefinition.defaultStyle || {fontSize: 12, font: 'Roboto'}, docDefinition.background, docDefinition.header, docDefinition.footer, docDefinition.images, docDefinition.watermark, docDefinition.pageBreakBefore);
-	var maxNumberPages = docDefinition.maxPagesNumber || -1;
+	registerDefaultTableLayouts(this.builder);
+	if (options.tableLayouts) {
+		this.builder.registerTableLayouts(options.tableLayouts);
+	}
+
+	var pages = this.builder.layoutDocument(
+		this.docDefinition.content, this.fontProvider, 
+		this.docDefinition.styles || {}, 
+		this.docDefinition.defaultStyle || {fontSize: 12, font: 'Roboto'}, 
+		this.docDefinition.background, 
+		this.docDefinition.header, 
+		this.docDefinition.footer, 
+		this.docDefinition.images, 
+		this.docDefinition.watermark, 
+		this.docDefinition.pageBreakBefore
+	);
+
+	var maxNumberPages = this.docDefinition.maxPagesNumber || -1;
 	if (isNumber(maxNumberPages) && maxNumberPages > -1) {
 		pages = pages.slice(0, maxNumberPages);
 	}
 
 	// if pageSize.height is set to Infinity, calculate the actual height of the page that
 	// was laid out using the height of each of the items in the page.
-	if (pageSize.height === Infinity) {
-		var pageHeight = calculatePageHeight(pages, docDefinition.pageMargins);
-		this.pdfKitDoc.options.size = [pageSize.width, pageHeight];
+	if (this.pageSize.height === Infinity) {
+		var pageHeight = calculatePageHeight(pages, this.docDefinition.pageMargins);
+		this.pdfKitDoc.options.size = [this.pageSize.width, pageHeight];
 	}
 
 	renderPages(pages, this.fontProvider, this.pdfKitDoc, options.progressCallback);
@@ -128,6 +130,51 @@ PdfPrinter.prototype.createPdfKitDocument = function (docDefinition, options) {
 	}
 	return this.pdfKitDoc;
 };
+
+/**
+ * Initializes a PDFmake document, this must be called before using any text calculation functions.
+ * The parameters are the same as in createPdfKitDocument()
+ * @param {Object} docDefinition document definition
+ * @param {Object} options additional options
+ */
+PdfPrinter.prototype.initDocument = function (docDefinition, options = {}) {
+
+	this.pageSize = fixPageSize(docDefinition.pageSize, docDefinition.pageOrientation);
+	var compressPdf = isBoolean(docDefinition.compress) ? docDefinition.compress : true;
+	var bufferPages = options.bufferPages || false;
+
+	this.pdfKitDoc = new PdfKit({size: [this.pageSize.width, this.pageSize.height], bufferPages: bufferPages, autoFirstPage: false, compress: compressPdf});
+	setMetadata(docDefinition, this.pdfKitDoc);
+
+	this.fontProvider = new FontProvider(this.fontDescriptors, this.pdfKitDoc);
+
+	docDefinition.images = docDefinition.images || {};
+
+	this.builder = new LayoutBuilder(this.pageSize, fixPageMargins(docDefinition.pageMargins || 40), new ImageMeasure(this.pdfKitDoc, docDefinition.images));
+	this.textTools = new TextTools(this.fontProvider);
+
+	this.docDefinition = docDefinition;
+};
+
+/**
+ * calculates the size of a given text with a given style
+ * @param {string} text text to calculate
+ * @param {Object} style the styling object that would be used in the "style" section of a document node
+ * @returns {Object} the resulting size that has the following structure:
+ * { 
+ *   width     : number,
+ *   height    : number,
+ *   fontSize  : number,
+ *   lineHeight: number,
+ *   ascender  : number,
+ *   descender : number
+ * }
+ */
+PdfPrinter.prototype.calculateTextSize = function(text, style = {}) {
+	const styleStack = new StyleContextStack(style, style);
+	return this.textTools.sizeOfString(text, styleStack);
+};
+
 
 function setMetadata(docDefinition, pdfKitDoc) {
 	// PDF standard has these properties reserved: Title, Author, Subject, Keywords,
