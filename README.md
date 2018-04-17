@@ -49,7 +49,7 @@ Check out [the playground](http://bpampuch.github.io/pdfmake/playground.html) an
 
 ## Added Features
 
-Here a list of all added/changed features in this version of PdfMake:
+Here's a list of all added/changed features in this version of PdfMake:
 
 ### Images
 An image can now be positioned vertically by using the **verticalAlignment** attribute.<br/>
@@ -93,7 +93,7 @@ For that you need to initialize PdfMake beforehand.
 ```js
 const pdfMake = new PdfMake(fontData).initDocument();
 ```
-After that, the text can me measured (the second argument for styling information is optional):
+After that, the text can be measured (the second argument for styling information is optional):
 ```js
 const textSize = pdfMake.calculateTextSize("SomeTextToMeasure", {
   font: "TheFontName",
