@@ -39,9 +39,6 @@
     "build": "gulp build",
     "test": "gulp"
   },
-  "publishConfig": {
-    "registry": "http://nexus1.hhoffice.de.etracker.com:8081/repository/npm-internal/"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/etracker/pdfmake.git"
