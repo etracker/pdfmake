@@ -1,6 +1,6 @@
 {
   "name": "@etracker/pdfmake",
-  "version": "0.1.36",
+  "version": "0.2.36",
   "description": "Client/server side PDF printing in pure JavaScript",
   "main": "src/printer.js",
   "directories": {
