@@ -82,7 +82,7 @@ function PdfPrinter(fontDescriptors) {
  *
  * @return {Object} a pdfKit document object which can be saved or encode to data-url
  */
-PdfPrinter.prototype.createPdfKitDocument = function (docDefinition = null, options = {}) {
+PdfPrinter.prototype.createPdfKitDocument = function (docDefinition = {}, options = {}) {
 
 	if (!this.docDefinition) {
 		this.initDocument(docDefinition, options);
@@ -137,7 +137,7 @@ PdfPrinter.prototype.createPdfKitDocument = function (docDefinition = null, opti
  * @param {Object} docDefinition document definition
  * @param {Object} options additional options
  */
-PdfPrinter.prototype.initDocument = function (docDefinition, options = {}) {
+PdfPrinter.prototype.initDocument = function (docDefinition = {}, options = {}) {
 
 	this.pageSize = fixPageSize(docDefinition.pageSize, docDefinition.pageOrientation);
 	var compressPdf = isBoolean(docDefinition.compress) ? docDefinition.compress : true;
@@ -154,6 +154,7 @@ PdfPrinter.prototype.initDocument = function (docDefinition, options = {}) {
 	this.textTools = new TextTools(this.fontProvider);
 
 	this.docDefinition = docDefinition;
+	return this;
 };
 
 /**
