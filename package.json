@@ -1,6 +1,6 @@
 {
   "name": "@etracker/pdfmake",
-  "version": "0.1.36",
+  "version": "0.2.36",
   "description": "Client/server side PDF printing in pure JavaScript",
   "main": "src/printer.js",
   "directories": {
@@ -38,9 +38,6 @@
   "scripts": {
     "build": "gulp build",
     "test": "gulp"
-  },
-  "publishConfig": {
-    "registry": "http://nexus1.hhoffice.de.etracker.com:8081/repository/npm-internal/"
   },
   "repository": {
     "type": "git",

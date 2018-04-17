@@ -47,6 +47,70 @@ Check out [the playground](http://bpampuch.github.io/pdfmake/playground.html) an
 * helper methods for opening/printing/downloading the generated PDF,
 * setting of PDF metadata (e.g. author, subject).
 
+## Added Features
+
+Here a list of all added/changed features in this version of PdfMake:
+
+### Images
+An image can now be positioned vertically by using the **verticalAlignment** attribute.<br/>
+Currently it can only be centered, either in itself or inside a fit-box.
+
+This would put the picture 50px down inside the center of the fit-box:
+```js
+{
+  image: 'image.png', // size 200x50
+  fit: [200, 100],
+  verticalAlignment: 'center',
+}
+```
+
+This would move the picture 25px down to its own center from whatever position it was:
+```js
+{
+  image: 'image.png', // size 200x50
+  verticalAlignment: 'center',
+}
+```
+
+### Tables
+If the **hLineWhenBroken** flag inside the table layout is set to **true**, the **hLineWidth**/**hLineColor** are also called when a page breaks.<br/>
+These events fire before the break happens, so that a line can be drawn at the end of the current page.
+```js
+table: {
+  dontBreakRows: true,
+  body: [...]
+},
+layout: {
+  hLineWhenBroken: true,
+  hLineWidth: (rowNum, node) => ...
+  hLineColor: (rowNum, node) => ...
+}
+```
+
+### Text
+Text can now be measured before creating an actual document. <br/>
+For that you need to initialize PdfMake beforehand.
+```js
+const pdfMake = new PdfMake(fontData).initDocument();
+```
+After that, the text can me measured (the second argument for styling information is optional):
+```js
+const textSize = pdfMake.calculateTextSize("SomeTextToMeasure", {
+  font: "TheFontName",
+  fontSize: 6.5
+});
+// example result:
+// { 
+//   width: 146.263,
+//   height: 8.853000000000002,
+//   fontSize: 6.5,
+//   lineHeight: 1,
+//   ascender: 6.948499999999999,
+//   descender: -1.9044999999999999 
+// }
+```
+
+
 ## Getting Started
 
 This document will walk you through the basics of pdfmake and will show you how to create PDF files in the browser. If you're interested in server-side printing check the examples folder.
